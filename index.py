@@ -2,14 +2,15 @@ import sys
 import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
+import requests
 
-def upload_resume(dbx, local_file_path, dropbox_file_path):
-    with open(local_resume_file_path, 'rb') as f:
+def upload_file(dbx, local_file_path, dropbox_file_path):
+    with open(local_file_path, 'rb') as f:
         # We use WriteMode=overwrite to make sure that the settings in the file
         # are changed on upload
-        print("Uploading " + local_resume_file_path + " to Dropbox as " + dropbox_resume_file_path + "...")
+        print("Uploading " + local_file_path + " to Dropbox as " + dropbox_file_path + "...")
         try:
-            dbx.files_upload(f.read(), dropbox_resume_file_path, mode=WriteMode('overwrite'))
+            dbx.files_upload(f.read(), dropbox_file_path, mode=WriteMode('overwrite'))
         except ApiError as err:
             # This checks for the specific error where a user doesn't have
             # enough Dropbox space quota to upload this file
@@ -23,12 +24,21 @@ def upload_resume(dbx, local_file_path, dropbox_file_path):
                 print(err)
                 sys.exit()
 
+def sharing_dropbox_file(dbx, dropbox_file_path, receiver_email_list=[], message = "Rumen shared this file.", access_level = 'viewer', add_message_as_comment = True):
+    members = []
+    # create list of MemberSelectors using receviers' email list.
+    for receiver_email in receiver_email_list:
+        members.append(dropbox.sharing.MemberSelector("email", receiver_email))
+
+    dbx.sharing_add_file_member(file = dropbox_file_path, members = members, custom_message = message, quiet=False, access_level=dropbox.sharing.AccessLevel(access_level, None), add_message_as_comment = add_message_as_comment)
+
+
 if __name__ == '__main__':
 
-    TOKEN = ''
+    TOKEN = '<my dropbox app token>'
     dbx = dropbox.Dropbox(TOKEN)
-    local_resume_file_path = '';
-    dropbox_resume_file_path = '/test.pdf'
+    local_file_path = '/Volumes/data/test.pdf';
+    dropbox_file_path = '/test.pdf'
     # Check for an access token
     if (len(TOKEN) == 0):
         sys.exit("ERROR: Looks like you didn't add your access token. ")
@@ -45,14 +55,12 @@ if __name__ == '__main__':
             "access token from the app console on the web.")
 
     # Create a backup of the current settings file
-    upload_resume(dbx, local_resume_file_path, dropbox_resume_file_path)
+    upload_file(dbx, local_file_path, dropbox_file_path)
+    receiver_email_list = [
+            "rumenslavov89@mail.bg",
+            "carlag@hyperiondev.com"
+    ]
+    sharing_dropbox_file(dbx, dropbox_file_path, receiver_email_list = receiver_email_list, message = "Rumen shared this.", access_level = 'viewer', add_message_as_comment = True)
 
-    # # Change the user's file, create another backup
-    # change_local_file("updated")
-    # backup()
-    #
-    # # Restore the local and Dropbox files to a certain revision
-    # to_rev = select_revision()
-    # restore(to_rev)
 
     print("Done!")
