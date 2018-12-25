@@ -2,7 +2,7 @@ import sys
 import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
-import requests
+
 
 def upload_file(dbx, local_file_path, dropbox_file_path):
     with open(local_file_path, 'rb') as f:
@@ -24,7 +24,7 @@ def upload_file(dbx, local_file_path, dropbox_file_path):
                 print(err)
                 sys.exit()
 
-def sharing_dropbox_file(dbx, dropbox_file_path, receiver_email_list=[], message = "Rumen shared this file.", access_level = 'viewer', add_message_as_comment = True):
+def sharing_dropbox_file(dbx, dropbox_file_path, receiver_email_list=[], message = "pioneeringdev shared this file.", access_level = 'viewer', add_message_as_comment = True):
     members = []
     # create list of MemberSelectors using receviers' email list.
     for receiver_email in receiver_email_list:
@@ -37,8 +37,7 @@ if __name__ == '__main__':
 
     TOKEN = '<my dropbox app token>'
     dbx = dropbox.Dropbox(TOKEN)
-    local_file_path = '/Volumes/data/test.pdf';
-    dropbox_file_path = '/test.pdf'
+
     # Check for an access token
     if (len(TOKEN) == 0):
         sys.exit("ERROR: Looks like you didn't add your access token. ")
@@ -54,13 +53,15 @@ if __name__ == '__main__':
         sys.exit("ERROR: Invalid access token; try re-generating an "
             "access token from the app console on the web.")
 
+    local_file_path = '/Volumes/data/test.pdf';
+    dropbox_file_path = '/test.pdf'
     # Create a backup of the current settings file
     upload_file(dbx, local_file_path, dropbox_file_path)
     receiver_email_list = [
             "rumenslavov89@mail.bg",
             "carlag@hyperiondev.com"
     ]
-    sharing_dropbox_file(dbx, dropbox_file_path, receiver_email_list = receiver_email_list, message = "Rumen shared this.", access_level = 'viewer', add_message_as_comment = True)
+    sharing_dropbox_file(dbx, dropbox_file_path, receiver_email_list = receiver_email_list, message = "pioneering shared this.", access_level = 'viewer', add_message_as_comment = True)
 
 
     print("Done!")
